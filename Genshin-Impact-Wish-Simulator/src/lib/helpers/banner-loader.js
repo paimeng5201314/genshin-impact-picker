@@ -5,7 +5,7 @@ import { version, wishPhase } from '$lib/data/wish-setup.json';
 
 import { imageCDN } from './assets';
 import { BannerManager } from './dataAPI/api-indexeddb';
-import { localConfig, rollCounter } from './dataAPI/api-localstore';
+import { localConfig } from './dataAPI/api-localstore';
 import {
 	activeBanner,
 	activeVersion,
@@ -66,37 +66,19 @@ const useCustomBanner = async (bannerID) => {
 	}
 };
 
-const checkBeginnerBanner = () => {
-	// const starterRollCount = rollCounter.get('beginner');
-	// const isShowBeginner = starterRollCount < 20;
-	const isShowBeginner = false;
-	showBeginner.set(isShowBeginner);
-	return isShowBeginner;
-};
-
 export const initializeBanner = async ({ patch, phase }) => {
 	try {
 		if (!patch || !phase) return;
 		if (patch.match(/(local|custom)/gi)) return useCustomBanner(phase);
 
-		const list = checkBeginnerBanner() ? [{ type: 'beginner', ...beginner.featured }] : [];
+		const list = [];
 
 		const { data } = await import(`$lib/data/banners/events/${patch}.json`);
 		const { banners } = data.find((b) => b.phase === phase);
-		const { events, weapons, standardVersion: stdver } = banners;
-		const { featured: stdFeatured } = standard.find(({ version }) => stdver === version) || {};
+		const { weapons, standardVersion: stdver } = banners;
 		const { featured: memFeatured } = member.find(({ version }) => stdver === version) || {};
-		const charEventBanner = {
-			type: 'character-event',
-			rateup: events.rateup,
-			stdver
-		};
 
-		list.push({ type: 'member', stdver, ...memFeatured});
-
-		events.featured.forEach((eventdata) => list.push({ ...eventdata, ...charEventBanner }));
-		list.push({ type: 'weapon-event', stdver, ...weapons });
-		list.push({ type: 'standard', stdver, ...stdFeatured });
+		list.push({ type: 'member', stdver, ...memFeatured });
 
 		bannerList.set(list);
 		isFatepointSystem.set(!!weapons.fatepointsystem);

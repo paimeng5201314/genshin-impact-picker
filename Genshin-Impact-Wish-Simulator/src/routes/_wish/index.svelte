@@ -18,6 +18,7 @@
 	import { APP_TITLE } from '$lib/env';
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import WISH, { roll } from '$lib/helpers/gacha/Wish';
+	import { loadMembers } from '$lib/helpers/member-loader';
 
 	// Components
 	import Header from './_header.svelte';
@@ -45,7 +46,10 @@
 		if (!patch || !phase) return;
 		WishInstance = await WISH.init(patch, phase, $customData);
 	};
-	onMount(() => activeVersion.subscribe(initialWish));
+	onMount(() => {
+		loadMembers().catch((error) => console.error(error));
+		return activeVersion.subscribe(initialWish);
+	});
 
 	const getIndexOfCharBanner = () => {
 		const events = $bannerList.filter(({ type }) => type === 'character-event');
@@ -65,10 +69,12 @@
 	let onWish = getContext('onWish');
 
 	const doRoll = async (count, bannerToRoll) => {
+		if (bannerToRoll === 'member') await loadMembers();
 
 		rollCount = count;
 		multi = count > 1;
 		const tmp = [];
+		const selectedNames = new Set();
 
 		rollCost = bannerToRoll === 'beginner' ? 8 : count;
 		if (!isUnlimited && rollCost > currencyUsed) return (showConvertModal = true);
@@ -76,8 +82,9 @@
 		onWish.set(true);
 
 		for (let i = 0; i < count; i++) {
-			const result = await roll(bannerToRoll, WishInstance, indexOfCharBanner);
-			tmp.push(result);
+			const rolledItem = await roll(bannerToRoll, WishInstance, indexOfCharBanner, selectedNames);
+			tmp.push(rolledItem);
+			if (bannerToRoll === 'member') selectedNames.add(rolledItem.chineseChar);
 		}
 
 		result = tmp;
@@ -195,7 +202,7 @@
 <div class="wish-container" class:show={showMeteor || showWishResult}>
 	<Meteor show={showMeteor} isSingle={single} rarity={meteorStar} />
 	{#if showWishResult}
-		<WishResult list={result} skip={skipSplashArt} bannerType={bannerType} />
+		<WishResult list={result} skip={skipSplashArt} {bannerType} />
 	{/if}
 </div>
 
