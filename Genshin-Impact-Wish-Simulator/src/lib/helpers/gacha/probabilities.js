@@ -31,6 +31,8 @@ export const prob = (items) => {
 
 // Read Custom Probability
 export const getRate = (banner, key) => {
+	// Personnel draws use the immutable in-game character-event rates.
+	if (banner === 'member') return probabilityRates.member[key];
 	if (banner === 'beginner') {
 		const initial = probabilityRates['character-event'];
 		return initial[key];

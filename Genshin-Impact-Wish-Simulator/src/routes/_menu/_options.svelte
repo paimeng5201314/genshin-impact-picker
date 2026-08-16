@@ -15,7 +15,6 @@
 	import { playSfx } from '$lib/helpers/audio/audio';
 	import { localeName, flags } from '$lib/data/country.json';
 	import { availableCurrencies, userCurrencies } from '$lib/helpers/currencies';
-	import { loadMembers } from '$lib/helpers/member-loader';
 
 	export let name;
 	export let useInput = false;
@@ -101,16 +100,6 @@
 		if (name === 'currencyItem') return setGameCurrencies(value);
 		if (name === 'multi') return setMultiPull(value);
 	};
-
-	let files;
-
-	const handleUpload = () => {
-		if (files) {
-			// console.log(files[0]);
-			loadMembers(files[0]);
-		}
-	}
-
 </script>
 
 <div class="option" class:sub>
@@ -220,12 +209,6 @@
 		</button>
 
 		<!-- General Option -->
-	{:else if name === 'upload'}
-		<input class="option-select-square" bind:files type="file" id="fileInput" accept=".txt" />
-			
-		<button class="option-select" on:click={handleUpload}>
-			上传
-		</button>
 	{:else}
 		<div class="option-select">
 			<button

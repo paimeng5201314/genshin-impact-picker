@@ -80,20 +80,20 @@ const WISH = {
 		return result;
 	},
 
-	_memberWish(rarity) {
+	_memberWish(rarity, excludedNames) {
 		const { _standardVer: stdver, _phase: phase, _version: version } = this;
 		const memberBanner = memberWish.init({ stdver, phase, version });
-		const result = memberBanner.get(rarity);
-		result.bannerName =  `wanderlust-invocation-${stdver}`;
+		const result = memberBanner.get(rarity, excludedNames);
+		result.bannerName = `wanderlust-invocation-${stdver}`;
 		return result;
 	},
 
-	getItem(rarity, banner, indexOfBanner) {
+	getItem(rarity, banner, indexOfBanner, excludedNames) {
 		const date = new Date();
 		const time = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 		const resultObj = { time, banner };
 
-		if (banner === 'member') return { ...resultObj, ...this._memberWish(rarity) };
+		if (banner === 'member') return { ...resultObj, ...this._memberWish(rarity, excludedNames) };
 		if (banner === 'beginner') return { ...resultObj, ...this._beginnerWish(rarity) };
 		if (banner === 'standard') return { ...resultObj, ...this._standardWish(rarity) };
 		if (banner === 'weapon-event') return { ...resultObj, ...this._weaponWish(rarity) };
